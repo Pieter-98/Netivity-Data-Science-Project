@@ -8,7 +8,6 @@ import base64
 
 amountOfErrors = 0
 totalRequests = 0
-debug = True
 timeStart = datetime.datetime.now().replace(microsecond=0)
 sys.stdout.write("Running\n")
 sys.stdout.flush()
