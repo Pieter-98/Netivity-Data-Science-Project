@@ -25,7 +25,7 @@ with zipfile.ZipFile("logs.zip", "r") as f:
                 for line in file:
                     totalRequests += 1
                     # parse the request
-                    request = json.loads(file.readline())
+                    request = json.loads(line)
             except:
                 # log amount of errors
                 amountOfErrors += 1
