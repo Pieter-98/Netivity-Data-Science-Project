@@ -15,7 +15,7 @@ filename = "logs.zip"
 
 totalRequests = 0
 amountOfErrors = 0
-debug = True
+debug = False
 totalStoredRequests = 0
 
 timeStart = datetime.datetime.now().replace(microsecond=0)
