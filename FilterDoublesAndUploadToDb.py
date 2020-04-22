@@ -30,7 +30,7 @@ def saveIfOperationIdNotInList(line):
     request = json.loads(line)
     if(isLegacyRequest(request)):
         operationId = request['context']['operation']['id']
-        if(database['context'].find({'id':operationId}).count() == 0):
+        if(database['context'].find({'operation.id':operationId}).count_documents() == 0):
             totalStoredRequests += 1
             storeDocuments(request)
             
