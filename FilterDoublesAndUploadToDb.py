@@ -30,7 +30,7 @@ def saveIfOperationIdNotInList(line):
     request = json.loads(line)
     if(isLegacyRequest(request)):
         operationId = request['context']['operation']['id']
-        if(database['context'].find({'operation.id':operationId}).count_documents() == 0):
+        if(database['context'].find({'operation.id':operationId}).sort({'operation.id':1}).count_documents() == 0):
             totalStoredRequests += 1
             storeDocuments(request)
             
@@ -108,6 +108,8 @@ def processRequests(file, filepath):
 # request is a Python dictionary which contains 3 keys, request, internal and context which can be accessed like 'request['request']'
 # Be aware that the request key returns an array, so accessing the id is done like this: request['request'][0]['id']
 def main():
+    database['context'].create_index("operation.id")
+
     with zipfile.ZipFile(filename, "r") as file:
         for blobfilepath in file.namelist():
             processRequests(file, blobfilepath)
