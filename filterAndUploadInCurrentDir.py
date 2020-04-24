@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import zipfile
 import os
 import json
@@ -14,7 +16,7 @@ database = mongodbclient['netivity']
 
 totalRequests = 0
 amountOfErrors = 0
-debug = True
+debug = False
 totalStoredRequests = 0
 
 timeStart = datetime.datetime.now().replace(microsecond=0)
