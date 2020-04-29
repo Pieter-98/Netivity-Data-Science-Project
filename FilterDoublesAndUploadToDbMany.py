@@ -53,12 +53,12 @@ def parseAndSaveLegacyRequest(file, filepath):
         
         for line in logsZip:
             # Each line is a request, check if it already exists in the database, if it doesn't, store it.
-            if(getLegacyRequestIfNotExists(line) is not None):
-                document = getLegacyRequestIfNotExists(line)
+            document = getLegacyRequestIfNotExists(line)
+            if(document is not None):
                 requests.append(document)
         if(len(requests) > 0):   
             totalStoredRequests += len(requests)
-            database['requests'].insert_many(requests)
+            database['legacy'].insert_many(requests)
         logsZip.close()
         # remove the unpacked file
         os.remove(content)            
@@ -74,8 +74,8 @@ def getLegacyRequestIfNotExists(line):
     if(isLegacyRequest(request)):
         operationId = request['context']['operation']['id']
         # Check if there already is a request with the same operation id
-        if(database['requests'].count_documents({'context.operation.id':operationId}) == 0):
-            # If there is no operation id, remove the incorrect key and return the request
+        if(database['gateway'].find({'context.operation.id' : operationId}).limit(1).count() == 0):
+            # If there is no operation id, remove the incorrect key and return the request so it can be saved
             return removeIncorrectKey(request)
 
 def processGatewayRequest(line):
@@ -101,12 +101,12 @@ def processRequests(file, filepath):
         requests = []
         for line in logsZip:
             totalRequests += 1
-            if(processGatewayRequest(line) is not None): 
-                document = processGatewayRequest(line)
+            document = processGatewayRequest(line)
+            if(document is not None): 
                 requests.append(document)
         if(len(requests) > 0):   
             totalStoredRequests += len(requests)
-            database['requests'].insert_many(requests)
+            database['gateway'].insert_many(requests)
         # close the file to avoid possible memory leaks            
         logsZip.close()
         # remove the unpacked file
@@ -118,7 +118,7 @@ def processRequests(file, filepath):
 
 def main():
     # Set index on operation id, massively increases find speed.
-    database['requests'].create_index([("context.operation.id",pymongo.ASCENDING)])
+    database['gateway'].create_index([("context.operation.id",pymongo.ASCENDING)])
 
     with zipfile.ZipFile(filename, "r") as file:
         # Insert all gateway requests. Afterwards loop through all legacy requests to check if the legacy request should be uploaded or not
