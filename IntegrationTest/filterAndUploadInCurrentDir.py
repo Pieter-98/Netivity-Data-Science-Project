@@ -9,14 +9,15 @@ import shutil
 import traceback
 import pymongo
 import cProfile
-# To use this script, make sure the logs.zip file is in the same directory as this script. Then execute `python unpackZip.py` to run.
 
+# Config
 mongodbclient = pymongo.MongoClient("mongodb://localhost:27017/")
 database = mongodbclient['netivity']
+debug = False
+
 
 totalRequests = 0
 amountOfErrors = 0
-debug = False
 totalStoredRequests = 0
 
 timeStart = datetime.datetime.now().replace(microsecond=0)
@@ -24,7 +25,7 @@ timeStart = datetime.datetime.now().replace(microsecond=0)
 sys.stdout.write("Running..\n")
 sys.stdout.flush()
     
-# Remove incorrect key _MS.ProcessedByMetricExtractors
+# Remove incorrect key _MS.ProcessedByMetricExtractors, this key can't be stored in mongodb
 def removeIncorrectKey(request):
     for element in request['context']['custom']['dimensions']:
         if "_MS.ProcessedByMetricExtractors" in element:
@@ -118,7 +119,7 @@ def processRequests(file, filepath):
 
 def main():
     # Set index on operation id, massively increases find speed.
-    database['gateway'].create_index([("context.operation.id",pymongo.ASCENDING)])
+    database['gateway'].create_index([("context.operation.id", pymongo.ASCENDING)])
     files = os.listdir(os.curdir)
     
     # Insert all gateway requests. Afterwards loop through all legacy requests to check if the legacy request should be uploaded or not
@@ -140,12 +141,10 @@ def main():
         if(datefile.endswith(".zip")):
             with zipfile.ZipFile(datefile, "r") as file:
                 for blobfilepath in file.namelist():
-                    parseAndSaveLegacyRequest(file, blobfilepath)
-    # Remove logs directory and all files in it because the function unpacks every file to that directory.
-    shutil.rmtree("logs", ignore_errors=True)       
-main()   
-# cProfile.run('main()','stats') 
-
+                    parseAndSaveLegacyRequest(file, blobfilepath)     
+if __name__ == "__main__":
+   main()
+   
 timeEnd = datetime.datetime.now().replace(microsecond=0)
 print("Script finished reading " + str(totalRequests) + " requests.")
 print("Saved "+ str(totalStoredRequests)+" requests")
