@@ -7,7 +7,6 @@ import shutil
 import traceback
 import pymongo
 import cProfile
-# To use this script, make sure the logs.zip file is in the same directory as this script. Then execute `python unpackZip.py` to run.
 
 mongodbclient = pymongo.MongoClient("mongodb://localhost:27017/")
 database = mongodbclient['netivity']
